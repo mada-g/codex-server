@@ -7,7 +7,7 @@ import mount from 'koa-mount';
 import cors from 'koa-cors';
 
 import router from './routes/index.js';
-import keys from '../utils/keys.js';
+import keys from '../keys.js';
 
 const app = koa();
 

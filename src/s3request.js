@@ -3,11 +3,11 @@ import shortid from 'shortid';
 
 const S3_BUCKET = process.env.S3_BUCKET;
 
-export function requestUpload(fileName, fileType){
+export function requestUpload(fileName, fileType, username){
   return new Promise((resolve, reject) => {
     const s3 = new aws.S3();
 
-    const id = shortid.generate();
+    const id = username + "_" + shortid.generate();
 
     const s3Params = {
       Bucket: S3_BUCKET,

@@ -1,19 +1,20 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
 
-import journalSchema from './journal.js';
+import pageData from './pageData.js';
+import imageData from './imageData.js';
 
 let userSchema = mongoose.Schema({
   username: String,
   password: String,
   usid: String,
   valid: Boolean,
-  journalCollection: [{
+  journalCollection: [pageData],
+  pageImgs: [{
     pageid: String,
-    title: String,
-    sections: [String],
-    items: String
-  }],
+    imgsData: [imageData]
+  }]
+
 });
 
 /*userSchema.methods.genHash = (password) => {

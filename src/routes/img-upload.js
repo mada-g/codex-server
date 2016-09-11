@@ -1,60 +1,96 @@
 import Router from 'koa-router';
+import koaBody from 'koa-body';
 
 import render from '../../utils/template-renderer.js';
 import {requestUpload} from '../s3request.js';
 
-export default function(mDB){
+import {isSecure} from './middlewares.js';
+
+export default function(userDB){
   let router = new Router();
 
-  router.get('/save', function *(next){
+  router.post('/sign-s3', isSecure, koaBody(), function *(next){
     console.log("ok...")
 
-    yield mDB.save({
-      uploaded: false,
-      imgid: "a7a8",
-      name: 'babous',
-      type: 'jpg',
-      submit: 'ok',
-      url: 'madalin.ski/test.jpg'
-    })
-
-    this.body = 'ok!';
-
-  })
-
-  router.get('/sign-s3', function *(next){
-    console.log("ok...")
-
-    const fileName = this.request.query['file-name'];
+    /*const fileName = this.request.query['file-name'];
     const fileType = this.request.query['file-type'];
+
+    const pageid = this.request.query['pageid'];
+*/
+    let reqBody = this.request.body;
+
+    const fileName = reqBody.filename;
+    const fileType = reqBody.filetype;
+    const dimen = reqBody.dimen;
+    const pageid = reqBody.pageid;
 
     console.log('filename: ' + fileName);
     console.log('fileType: ' + fileType);
+    console.log('dimensions:' + dimen);
 
     try{
 
-      let data = yield requestUpload(fileName, fileType);
-      yield mDB.save({
+      let data = yield requestUpload(fileName, fileType, this.req.user.username);
+      let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
+
+      let pageImgs = doc['pageImgs'];
+      if(!pageImgs) throw 'images not found';
+
+      let thePage = pageImgs.find((p) => p.pageid === pageid);
+      if(!thePage) throw "page not found";
+
+      console.log(thePage);
+      console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+      console.log(thePage["imgsData"]);
+      console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+      thePage["imgsData"].push({
         imgid: data.id,
         name: fileName,
         type: fileType,
+        dimen: dimen,
         url: data.url,
         submit: 'ok',
         uploaded: false
-      });
+      })
+
+      yield doc.save();
       this.body = JSON.stringify(data);
 
+      //this.body = {status: "ok"};
+
     } catch(e){
-      console.log(e);
+
+      console.log("Error!!!!!");
       this.body = null;
     }
   })
 
-  router.get('/valid-upload', function *(next){
-    const id = this.request.query['imgid'];
+  router.get('/valid-upload', isSecure, function *(next){
+    const imgid = this.request.query['imgid'];
+    const pageid = this.request.query['pageid']
+
+    console.log('validating upload...');
+    console.log(imgid);
+    console.log(pageid);
 
     try{
-      let doc = yield mDB.update({imgid: id}, "uploaded", true);
+
+      let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
+
+      let pageImgs = doc['pageImgs'];
+      if(!pageImgs) throw 'images not found';
+
+      let thePage = pageImgs.find((p) => p.pageid === pageid);
+      if(!thePage) throw "page not found";
+
+      let theImage = thePage["imgsData"].find((p) => p.imgid === imgid);
+      if(!theImage) throw "image not found";
+
+      theImage.uploaded = true;
+
+      yield doc.save();
+
       this.body = JSON.stringify({status: 'ok'});
     } catch(e){
       console.log(e);

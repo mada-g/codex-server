@@ -48,6 +48,14 @@ export default class MongoConnection{
     })
   }
 
+  getFields = (query, fields) => {
+    return new Promise((resolve, reject) => {
+      this.model.findOne(query, fields).then((res) => {
+        resolve(res);
+      }).catch((error) => {reject(error)});
+    })
+  }
+
   getAll = (query, selection) => {
     return new Promise((resolve, reject) => {
       this.model.find(query, selection).then((res) => {

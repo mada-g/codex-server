@@ -30,11 +30,12 @@ export default function(passport){
   let editor = Editor(new MongoConnect(userDB));
   let publicRoutes = PublicRoutes(new MongoConnect(userDB));
   let authentication = Authentication(passport);
+  let imgUpload = ImgUpload(new MongoConnect(userDB));
 
   router.use(publicRoutes.routes(), publicRoutes.allowedMethods());
   router.use(authentication.routes(), authentication.allowedMethods());
   router.use(editor.routes(), editor.allowedMethods());
-
+  router.use(imgUpload.routes(), imgUpload.allowedMethods());
 
   router.post('/memo', koaBody(), function *(next){
     this.body = {status: 'okok'};

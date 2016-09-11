@@ -19,6 +19,7 @@ export function findPage(userDB){
   }
 }
 
+
 export let isSecure = function *(next){
   if(!this.isAuthenticated()){
     this.redirect('/login');

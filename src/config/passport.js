@@ -61,7 +61,7 @@ export function passportConfig(passport){
 
             genHash(password)
                    .then((hash) => {
-                     return userDB.save({ username, password: hash , journalCollection: [] })
+                     return userDB.save({ username, password: hash , journalCollection: [], pageImgs: [] })
                    })
                    .then((newUser) => {console.log('saving user!'); return done(null, newUser)})
                    .catch((err) => {console.log(err); return done(err)});
@@ -79,7 +79,7 @@ export function passportConfig(passport){
         passReqToCallback: true
       },
       (req, username, password, done) => {
-        userDB.get({"username": username}).then((user) => {
+        userDB.getFields({"username": username}, 'username password').then((user) => {
           if(!user) return done(null, false, {message: "username invalid"});
 
           else{

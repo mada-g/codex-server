@@ -48,6 +48,26 @@ export default function(userDB){
   })
 
 
+  router.get('/pageimgs', isSecure, function *(next){
+    const pageid = this.request.query['pageid'];
+
+    try{
+      let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
+
+      let pageImgs = doc['pageImgs'];
+      if(!pageImgs) throw 'images not found';
+
+      let thePage = pageImgs.find((p) => p.pageid === pageid);
+      if(!thePage) throw "page not found";
+
+      this.body = {status:true, imgsData: thePage['imgsData']}
+    } catch(e) {
+      console.log(e);
+      this.body = {status: false, imgsData: null}
+    }
+
+  })
+
   router.post('/save', isSecure, koaBody(), function *(next){
     console.log('saving page....');
 
@@ -81,12 +101,12 @@ export default function(userDB){
 
   router.post('/create', isSecure, koaBody(), function *(next){
     let data = this.request.body;
-
-    let doc = yield userDB.get({username: this.req.user.username});
-
     let pageid = shortid.generate();
 
+    let doc = yield userDB.get({username: this.req.user.username});
     let collection = doc['journalCollection'];
+    let pageImgs = doc['pageImgs'];
+
 
     collection.push({
       pageid: pageid,
@@ -95,6 +115,11 @@ export default function(userDB){
       items: JSON.stringify({
         'title': {type:"text", content:"enter title", options: {align: "aligncenter"}}
       })
+    })
+
+    pageImgs.push({
+      pageid: pageid,
+      imgsData: []
     })
 
     try{
