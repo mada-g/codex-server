@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+    <title>codex // georges madalinski</title>
+    <link href="https://fonts.googleapis.com/css?family=Righteous|Coda|Raleway|Dosis|Josefin+Sans|Quicksand" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/assets/style_identification.css"/>
+
+</head>
+<body>
+<div class="identification">
+
+  <div class="headerBar">
+    <div class="tool-sect page-tools">
+      <div class="toolbox">
+        <div class="toolbox-box app-title">codex</div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+
+    <div class="title">{{{title}}}</div>
+
+
+    <form action={{{postURL}}} method="post">
+        <div class="form-container">
+            <div class="label">Username</div>
+            <input type="text" class="form-input" name="username">
+        </div>
+        <div class="form-container">
+            <div class="label">Password</div>
+            <input type="password" class="form-input" name="password">
+        </div>
+
+        <button type="submit" class="form-btn">{{{title}}}</button>
+    </form>
+
+    <div class="alt-btn"><a href={{{altRoute}}}>{{{altLabel}}}</a></div>
+
+</div>
+
+</div>
+</body>
+</html>

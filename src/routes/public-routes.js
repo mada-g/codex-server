@@ -8,11 +8,14 @@ export default function(userDB){
   let router = new Router();
 
   router.get('/signup', function *(next){
-    this.body = yield render('signup', {});
+    //this.body = yield render('signup', {});
+    this.body = yield render('identification', {title: 'Sign Up', postURL: "/signup", altRoute: "/login", altLabel: "sign in"})
   })
 
   router.get('/login', function *(next){
-    this.body = yield render('login', {});
+
+    this.body = yield render('identification', {title: 'Login', postURL: "/login", altRoute: "/signup", altLabel: "create account"})
+    //this.body = yield render('login', {});
   })
 
 

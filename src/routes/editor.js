@@ -11,7 +11,25 @@ export default function(userDB){
 
   router.get('/editor', isSecure, function *(next){
 
-    this.body = yield render('editor', {});
+    try{
+      let doc = yield userDB.getFields({username: this.req.user.username}, 'drafts published');
+
+      console.log(doc['drafts']);
+
+      console.log(doc['published']);
+
+      let userObj = {
+        username: this.req.user.username,
+        drafts: doc['drafts'],
+        published: doc['published']
+      }
+
+      this.body = yield render('home', {userData: JSON.stringify(userObj)});
+    } catch(err) {
+      console.log(err);
+      this.body = {status: false, error: err}
+    }
+
 
   });
 
@@ -22,7 +40,11 @@ export default function(userDB){
       pageid: this.req.pageObj.pageid,
       title: this.req.pageObj.title,
       sections: this.req.pageObj.sections,
-      items: JSON.parse(this.req.pageObj.items)
+      items: JSON.parse(this.req.pageObj.items),
+      published: this.req.pageObj.published,
+      headings: this.req.pageObj.headings,
+      headingNumbering: this.req.pageObj.headingNumbering,
+      imgsData: []
     }
 
     this.body = yield render('editor', {pageContent: JSON.stringify(pageObj)});
@@ -74,18 +96,35 @@ export default function(userDB){
     let data = this.request.body;
     //data = JSON.parse(data);
 
-    let pageData = {
-      title: data.title,
-      pageid: data.pageid,
-      sections: data.sections,
-      items: JSON.stringify(data.items)
-    }
-
-    console.log(pageData);
 
     let doc = yield userDB.get({username: this.req.user.username});
     let collection = doc['journalCollection'];
     let index = collection.findIndex((j) => j.pageid === data.pageid);
+
+    let info = null;
+
+    if(collection[index]['published']){
+      info = doc['published'];
+    } else {
+      info = doc['drafts'];
+    }
+
+    let theInfo = info.find((i) => i.pageid === data.pageid);
+
+    theInfo.title = data.title;
+
+    let pageData = {
+      title: data.title,
+      pageid: data.pageid,
+      sections: data.sections,
+      items: JSON.stringify(data.items),
+      published: collection[index]['published'],
+      headings: data.headings,
+      headingNumbering: data.headingNumbering
+    }
+
+    console.log(pageData);
+
     collection[index] = pageData;
 
     try{
@@ -106,14 +145,15 @@ export default function(userDB){
     let doc = yield userDB.get({username: this.req.user.username});
     let collection = doc['journalCollection'];
     let pageImgs = doc['pageImgs'];
-
+    let drafts = doc['drafts'];
 
     collection.push({
       pageid: pageid,
       title: data.title,
+      published: false,
       sections: ['title'],
       items: JSON.stringify({
-        'title': {type:"text", content:"enter title", options: {align: "aligncenter"}}
+        'title': {type:"text", content:"New Page", options: {align: "aligncenter"}}
       })
     })
 
@@ -121,6 +161,8 @@ export default function(userDB){
       pageid: pageid,
       imgsData: []
     })
+
+    drafts.push({pageid: pageid, title: "New Page", details: "September 20 2016"});
 
     try{
       let res = yield doc.save();

@@ -37,9 +37,5 @@ export default function(passport){
   router.use(editor.routes(), editor.allowedMethods());
   router.use(imgUpload.routes(), imgUpload.allowedMethods());
 
-  router.post('/memo', koaBody(), function *(next){
-    this.body = {status: 'okok'};
-  })
-
   return router;
 }

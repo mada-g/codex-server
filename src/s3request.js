@@ -27,3 +27,19 @@ export function requestUpload(fileName, fileType, username){
     })
   })
 }
+
+export function deleteImg(fileName){
+  return new Promise((resolve, reject) => {
+    const s3 = new aws.S3();
+
+    const s3Params = {
+      Bucket: S3_BUCKET,
+      Key: fileName
+    }
+
+    s3.deleteObject(s3Params, (err, data) => {
+      if(err) reject({status: false});
+      else resolve({status: true});
+    })
+  })
+}

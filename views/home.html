@@ -1,16 +1,20 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <title>Home</title>
-  <style>
-      body { padding-top:80px; }
-  </style>
-</head>
+  <head>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Courgette|Glass+Antiqua|Oleo+Script|Dosis|Bungee|Josefin+Sans" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/home_style.css"/>
 
-<body>
-  <div>
-    OK!
-    {{name}}
-  </div>
-</body>
+    <script type="application/javascript">
+      window.__init_state = {{{userData}}};
+    </script>
+
+  </head>
+
+  <body>
+    <div id="react-view"></div>
+    <script src="/assets/common.js"></script>
+    <script src="/assets/home.js"></script>
+  </body>
+
 </html>

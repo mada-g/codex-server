@@ -2,7 +2,7 @@ import Router from 'koa-router';
 import koaBody from 'koa-body';
 
 import render from '../../utils/template-renderer.js';
-import {requestUpload} from '../s3request.js';
+import {requestUpload, deleteImg} from '../s3request.js';
 
 import {isSecure} from './middlewares.js';
 
@@ -91,11 +91,44 @@ export default function(userDB){
 
       yield doc.save();
 
-      this.body = JSON.stringify({status: 'ok'});
+      this.body = JSON.stringify({status: true, imgData: theImage});
     } catch(e){
       console.log(e);
-      this.body = JSON.stringify({status: 'error'});
+      this.body = JSON.stringify({status: false, imgData: null});
     }
+  })
+
+
+  router.get('/delete-image', function *(next){
+    const imgid = this.request.query['imgid'];
+    const pageid = this.request.query['pageid']
+
+    try{
+      let res = yield deleteImg(imgid);
+
+      if(!res.status) throw "could not reach s3";
+
+      let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
+
+      let pageImgs = doc['pageImgs'];
+      if(!pageImgs) throw 'images not found';
+
+      let thePage = pageImgs.find((p) => p.pageid === pageid);
+      if(!thePage) throw "page not found";
+
+      let theImageIndex = thePage["imgsData"].findIndex((p) => p.imgid === imgid);
+      if(!theImageIndex) throw "image not found";
+
+      thePage["imgsData"].splice(theImageIndex, 1);
+
+      yield doc.save();
+
+      this.body = JSON.stringify({status: true});
+    } catch(e){
+      console.log(e);
+      this.body = JSON.stringify({status: false});
+    }
+
   })
 
   return router;

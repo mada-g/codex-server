@@ -61,7 +61,7 @@ export function passportConfig(passport){
 
             genHash(password)
                    .then((hash) => {
-                     return userDB.save({ username, password: hash , journalCollection: [], pageImgs: [] })
+                     return userDB.save({ username, password: hash , drafts: [], published: [], journalCollection: [], pageImgs: [] })
                    })
                    .then((newUser) => {console.log('saving user!'); return done(null, newUser)})
                    .catch((err) => {console.log(err); return done(err)});
