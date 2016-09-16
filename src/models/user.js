@@ -2,21 +2,16 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
 
 import pageData from './pageData.js';
-import imageData from './imageData.js';
 import pageInfo from './pageInfo.js';
+import pageImages from './pageImages.js';
 
 let userSchema = mongoose.Schema({
   username: String,
   password: String,
   usid: String,
   valid: Boolean,
-  drafts: [pageInfo],
-  published: [pageInfo],
   journalCollection: [pageData],
-  pageImgs: [{
-    pageid: String,
-    imgsData: [imageData]
-  }]
+  pageImgs: [pageImages]
 
 });
 

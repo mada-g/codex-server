@@ -4,6 +4,32 @@ export let userFromURL = function *(next){
   yield next;
 }
 
+
+export function retrievePage(userDB){
+  return function *(next){
+    try{
+      let pageid = this.params.pageid || this.request.body.pageid;
+      if(!pageid) throw 'page not found!';
+
+      console.log('retrieving: ' + pageid+"...");
+
+      let doc = yield userDB.getFields({username: this.req.userid, "journalCollection.pageid": pageid}, {"journalCollection.$": 1});
+      this.req.pageObj = doc['journalCollection'][0];
+      this.req.dbDoc = doc;
+
+      console.log('retieved!');
+
+    } catch(err) {
+      console.log(err);
+      this.req.pageObj = null;
+    }
+
+    yield next;
+  }
+}
+
+
+
 export function findPage(userDB){
   return function *(next){
     let pageid = this.params.pageid.replace("+", " ");

@@ -10,13 +10,6 @@ export default function(userDB){
   let router = new Router();
 
   router.post('/sign-s3', isSecure, koaBody(), function *(next){
-    console.log("ok...")
-
-    /*const fileName = this.request.query['file-name'];
-    const fileType = this.request.query['file-type'];
-
-    const pageid = this.request.query['pageid'];
-*/
     let reqBody = this.request.body;
 
     const fileName = reqBody.filename;
@@ -31,37 +24,24 @@ export default function(userDB){
     try{
 
       let data = yield requestUpload(fileName, fileType, this.req.user.username);
-      let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
 
-      let pageImgs = doc['pageImgs'];
-      if(!pageImgs) throw 'images not found';
+      let doc = yield userDB.getModel().update({username: this.req.userid, "pageImgs.pageid": pageid}, { $push: {
+        "pageImgs.$.imgsData": {
+          imgid: data.id,
+          name: fileName,
+          type: fileType,
+          dimen: dimen,
+          url: data.url,
+          submit: 'ok',
+          uploaded: false
+        }
+      }});
 
-      let thePage = pageImgs.find((p) => p.pageid === pageid);
-      if(!thePage) throw "page not found";
-
-      console.log(thePage);
-      console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-      console.log(thePage["imgsData"]);
-      console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
-      thePage["imgsData"].push({
-        imgid: data.id,
-        name: fileName,
-        type: fileType,
-        dimen: dimen,
-        url: data.url,
-        submit: 'ok',
-        uploaded: false
-      })
-
-      yield doc.save();
       this.body = JSON.stringify(data);
 
-      //this.body = {status: "ok"};
-
     } catch(e){
-
       console.log("Error!!!!!");
+      console.log(e);
       this.body = null;
     }
   })
@@ -70,13 +50,40 @@ export default function(userDB){
     const imgid = this.request.query['imgid'];
     const pageid = this.request.query['pageid']
 
-    console.log('validating upload...');
+    console.log('validating image upload...');
     console.log(imgid);
     console.log(pageid);
 
     try{
 
-      let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
+      let doc = yield userDB.getModel().update({
+        username: this.req.userid,
+        "pageImgs.pageid": pageid,
+        "pageImgs.imgsData.imgid": imgid
+      },
+      {
+        $set: { "pageImgs.$.imgsData.$.uploaded": true }
+      })
+
+/*
+      let doc = yield userDB.getFields({
+        username: this.req.userid,
+        "pageImgs.pageid": pageid,
+        "pageImgs.imgsData.imgid": imgid
+      },
+      {
+        "pageImgs.imgsData.$":1
+      });
+*/
+
+      /*let doc = yield userDB.getFields({username: this.req.userid, "pageImgs.pageid": pageid}, {"pageImgs.$":1});
+
+      if(!doc) throw "page data not found";
+
+      let thePage = doc["pageImgs"][0]
+*/
+
+      /*let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
 
       let pageImgs = doc['pageImgs'];
       if(!pageImgs) throw 'images not found';
@@ -90,11 +97,11 @@ export default function(userDB){
       theImage.uploaded = true;
 
       yield doc.save();
-
-      this.body = JSON.stringify({status: true, imgData: theImage});
+*/
+      this.body = JSON.stringify({status: true});
     } catch(e){
       console.log(e);
-      this.body = JSON.stringify({status: false, imgData: null});
+      this.body = JSON.stringify({status: false});
     }
   })
 

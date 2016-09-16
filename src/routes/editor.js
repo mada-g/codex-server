@@ -4,70 +4,74 @@ import shortid from 'shortid';
 
 import render from '../../utils/template-renderer.js';
 
-import {isSecure, findPage} from './middlewares.js';
+import {isSecure, findPage, retrievePage} from './middlewares.js';
 
 export default function(userDB){
   let router = new Router();
 
+
   router.get('/editor', isSecure, function *(next){
-
     try{
-      let doc = yield userDB.getFields({username: this.req.user.username}, 'drafts published');
+      let doc = yield userDB.getFields({username: this.req.user.username}, {
+        "journalCollection.title": 1,
+        "journalCollection.pageid": 1,
+        "journalCollection.published": 1
+      });
 
-      console.log(doc['drafts']);
-
-      console.log(doc['published']);
-
-      let userObj = {
-        username: this.req.user.username,
-        drafts: doc['drafts'],
-        published: doc['published']
+      if(!doc || !doc['journalCollection']){
+        throw 'user data not found.';
       }
 
-      this.body = yield render('home', {userData: JSON.stringify(userObj)});
+      let drafts = [], published = [];
+
+      doc['journalCollection'].forEach((p) => {
+        if(p.published) published.push({pageid: p.pageid, title: p.title, details: "ok ok ok"});
+        else drafts.push({pageid: p.pageid, title: p.title, details: "ok ok ok"});
+      })
+
+
+      this.body = yield render('home', {userData: JSON.stringify(
+          {
+            username: this.req.user.username,
+            drafts: drafts,
+            published: published
+          }
+        )}
+      );
+
     } catch(err) {
       console.log(err);
       this.body = {status: false, error: err}
     }
 
+  })
 
-  });
 
+  router.get('/editor/:pageid', isSecure, function *(next){
+    try{
+      let doc = yield userDB.getFields({username: this.req.user.username, "journalCollection.pageid": this.params.pageid}, {"journalCollection.$": 1});
 
-  router.get('/editor/:pageid', isSecure, findPage(userDB), function *(next){
+      let pageData = doc['journalCollection'][0];
 
-    let pageObj = {
-      pageid: this.req.pageObj.pageid,
-      title: this.req.pageObj.title,
-      sections: this.req.pageObj.sections,
-      items: JSON.parse(this.req.pageObj.items),
-      published: this.req.pageObj.published,
-      headings: this.req.pageObj.headings,
-      headingNumbering: this.req.pageObj.headingNumbering,
-      imgsData: []
+      let pageObj = {
+        pageid: pageData.pageid,
+        title: pageData.title,
+        sections: pageData.sections,
+        items: JSON.parse(pageData.items),
+        published: pageData.published,
+        headings: pageData.headings,
+        headingNumbering: pageData.headingNumbering,
+        imgsData: []
+      }
+
+      this.body = yield render('editor', {pageContent: JSON.stringify(pageObj)});
+
+    } catch (err) {
+      console.log(err);
+      this.body = err;
     }
 
-    this.body = yield render('editor', {pageContent: JSON.stringify(pageObj)});
-
   });
-
-
-
-  router.get('/save/:pageid', isSecure, function *(next){
-    let titleParam = this.params.pageid.replace("+", " ");
-
-    userDB.get({username: this.req.user.username}).then((doc) => {
-      let collection = doc['journalCollection'];
-      let index = collection.findIndex((j) => j.title === titleParam);
-
-      collection[index] = {
-        title: titleParam,
-        sections: ['aaa', 'bbb', 'nnn'],
-        items: 'changed!'
-      }
-      doc.save();
-    })
-  })
 
 
   router.get('/pageimgs', isSecure, function *(next){
@@ -91,45 +95,26 @@ export default function(userDB){
   })
 
   router.post('/save', isSecure, koaBody(), function *(next){
-    console.log('saving page....');
-
     let data = this.request.body;
-    //data = JSON.parse(data);
-
-
-    let doc = yield userDB.get({username: this.req.user.username});
-    let collection = doc['journalCollection'];
-    let index = collection.findIndex((j) => j.pageid === data.pageid);
-
-    let info = null;
-
-    if(collection[index]['published']){
-      info = doc['published'];
-    } else {
-      info = doc['drafts'];
-    }
-
-    let theInfo = info.find((i) => i.pageid === data.pageid);
-
-    theInfo.title = data.title;
-
-    let pageData = {
-      title: data.title,
-      pageid: data.pageid,
-      sections: data.sections,
-      items: JSON.stringify(data.items),
-      published: collection[index]['published'],
-      headings: data.headings,
-      headingNumbering: data.headingNumbering
-    }
-
-    console.log(pageData);
-
-    collection[index] = pageData;
 
     try{
+      let pageData = {
+        title: data.title,
+        pageid: data.pageid,
+        sections: data.sections,
+        items: JSON.stringify(data.items),
+        published: data.published,
+        headings: data.headings,
+        headingNumbering: data.headingNumbering
+      }
+
+      let doc = yield userDB.getModel().update({username: this.req.userid, "journalCollection.pageid": data.pageid}, {
+        $set: {"journalCollection.$": pageData}
+      })
+
       let res = yield doc.save();
       this.body = {status: true, error: null};
+
     } catch(err) {
       this.body = {status: false, error: err};
     }
@@ -137,38 +122,36 @@ export default function(userDB){
   })
 
 
-
   router.post('/create', isSecure, koaBody(), function *(next){
-    let data = this.request.body;
-    let pageid = shortid.generate();
-
-    let doc = yield userDB.get({username: this.req.user.username});
-    let collection = doc['journalCollection'];
-    let pageImgs = doc['pageImgs'];
-    let drafts = doc['drafts'];
-
-    collection.push({
-      pageid: pageid,
-      title: data.title,
-      published: false,
-      sections: ['title'],
-      items: JSON.stringify({
-        'title': {type:"text", content:"New Page", options: {align: "aligncenter"}}
-      })
-    })
-
-    pageImgs.push({
-      pageid: pageid,
-      imgsData: []
-    })
-
-    drafts.push({pageid: pageid, title: "New Page", details: "September 20 2016"});
 
     try{
-      let res = yield doc.save();
-      //this.redirect('/editor/' + pageid);
+      let data = this.request.body;
+      let pageid = shortid.generate();
+
+      let newPage = {
+        pageid: pageid,
+        title: data.title,
+        published: false,
+        sections: ['title'],
+        items: JSON.stringify({
+          'title': {type:"text", content:"New Page", options: {align: "aligncenter"}}
+        })
+      }
+
+      let newPageInfo = {pageid: pageid, title: "New Page", details: "September 20 1992"}
+
+      let pageImgs = {pageid: pageid, imgsData: []}
+
+      let doc = yield userDB.getModel().update({username: this.req.userid}, { $push: {
+        "journalCollection": newPage,
+        "drafts": newPageInfo,
+        "pageImgs": pageImgs
+      }});
+
       this.body = {status: true, error: null, pageid: pageid};
+
     } catch(err) {
+      console.log(err);
       this.body = {status: false, error: err, pageid: null};
     }
   })
