@@ -56,34 +56,7 @@ export default function(userDB){
 
     try{
 
-      let doc = yield userDB.getModel().update({
-        username: this.req.userid,
-        "pageImgs.pageid": pageid,
-        "pageImgs.imgsData.imgid": imgid
-      },
-      {
-        $set: { "pageImgs.$.imgsData.$.uploaded": true }
-      })
-
-/*
-      let doc = yield userDB.getFields({
-        username: this.req.userid,
-        "pageImgs.pageid": pageid,
-        "pageImgs.imgsData.imgid": imgid
-      },
-      {
-        "pageImgs.imgsData.$":1
-      });
-*/
-
-      /*let doc = yield userDB.getFields({username: this.req.userid, "pageImgs.pageid": pageid}, {"pageImgs.$":1});
-
-      if(!doc) throw "page data not found";
-
-      let thePage = doc["pageImgs"][0]
-*/
-
-      /*let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
+      let doc = yield userDB.getFields({username: this.req.user.username}, 'pageImgs');
 
       let pageImgs = doc['pageImgs'];
       if(!pageImgs) throw 'images not found';
@@ -97,7 +70,7 @@ export default function(userDB){
       theImage.uploaded = true;
 
       yield doc.save();
-*/
+
       this.body = JSON.stringify({status: true});
     } catch(e){
       console.log(e);
@@ -108,7 +81,7 @@ export default function(userDB){
 
   router.get('/delete-image', function *(next){
     const imgid = this.request.query['imgid'];
-    const pageid = this.request.query['pageid']
+    const pageid = this.request.query['pageid'];
 
     try{
       let res = yield deleteImg(imgid);

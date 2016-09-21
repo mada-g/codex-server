@@ -18,6 +18,17 @@ a{
   color: rgb(44, 113, 131);
 }
 
+.status-msg .err{
+  text-align: left;
+  display: inline-block;
+  font-family: 'Raleway', 'arial';
+  font-size: 16px;
+  color: white;
+  background-color: rgb(158, 61, 45);
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
 .container{
   position: relative;
   max-width: 420px;

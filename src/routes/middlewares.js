@@ -1,3 +1,4 @@
+import validator from 'validator';
 
 export let userFromURL = function *(next){
   this.req.userid = this.params.userid;
@@ -48,6 +49,8 @@ export function findPage(userDB){
 
 export let isSecure = function *(next){
   if(!this.isAuthenticated()){
+    console.log('not authenticated')
+    console.log(this.req.user);
     this.redirect('/login');
   } else {
     this.req.userid = this.req.user.username;
@@ -63,5 +66,27 @@ export let isAuthorized = function *(next){
   else{
     if(this.params['usid'] === this.req.user.username) yield next;
     else this.redirect('/login');
+  }
+}
+
+export function authenticate(passport, strategy){
+  return function *(next){
+    let _t = this;
+    yield passport.authenticate(`local-${strategy}`, function *(err, user, info){
+      if(err){
+        _t.redirect(`/${strategy}`);
+      }
+      else if(user){
+        let loginErr = yield _t.login(user)
+        if(!loginErr) _t.redirect('/editor');
+        else _t.redirect(`/${strategy}`)
+      }
+      else if(!user && info){
+        _t.redirect(`/${strategy}?status=${info.status}`);
+      }
+      else{
+        _t.redirect(`/${strategy}`);
+      }
+    }).call(this, next)
   }
 }

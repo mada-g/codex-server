@@ -1,4 +1,5 @@
 import localpassport from 'passport-local';
+import validator from 'validator';
 
 import {genHash, validatePassword} from './hashing.js';
 
@@ -53,9 +54,16 @@ export function passportConfig(passport){
       },
       (req, username, password, done) => {
         console.log('authenticating...');
+        console.log("username: " + username);
+        console.log("password: " + password);
+
+        if(!validator.isAlphanumeric(username + '') || !validator.isAlphanumeric(password + '')){
+          return done(null, false, {status: "format"})
+        }
+
         userDB.get({"username": username}).then((user) => {
           console.log('connection ok');
-          if(user) return done(null, false, {message: "username is already taken."});
+          if(user) return done(null, false, {status: "invalidu"});
           else{
             console.log('username not taken');
 
@@ -79,13 +87,18 @@ export function passportConfig(passport){
         passReqToCallback: true
       },
       (req, username, password, done) => {
+
+        if(!validator.isAlphanumeric(username + '') || !validator.isAlphanumeric(password + '')){
+          return done(null, false, {status: "format"})
+        }
+
         userDB.getFields({"username": username}, 'username password').then((user) => {
-          if(!user) return done(null, false, {message: "username invalid"});
+          if(!user) return done(null, false, {status: "invalidu"});
 
           else{
             validatePassword(password, user.password).then((res) => {
               if(res) return done(null, user);
-              else return done(null, false, {message: "wrong password"});
+              else return done(null, false, {status: "invalidp"});
             }).catch(done);
           }
         }).catch(done);

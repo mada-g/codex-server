@@ -135,7 +135,9 @@ export default function(userDB){
         sections: ['title'],
         items: JSON.stringify({
           'title': {type:"text", content:"New Page", options: {align: "aligncenter"}}
-        })
+        }),
+        headings: [],
+        headingNumbering: "standard"
       }
 
       let newPageInfo = {pageid: pageid, title: "New Page", details: "September 20 1992"}
@@ -154,6 +156,24 @@ export default function(userDB){
       console.log(err);
       this.body = {status: false, error: err, pageid: null};
     }
+  })
+
+  router.get('/delete-page', isSecure, function *(next){
+    const pageid = this.request.query['pageid'];
+
+    try{
+      let doc = yield userDB.getModel().update(
+        {username: this.req.userid},
+        {$pull: {"journalCollection": {"pageid": pageid}, "pageImgs":{"pageid": pageid} }}
+      );
+
+      this.body = {status: true};
+
+    } catch(err) {
+      console.log(err);
+      this.body = {status: false};
+    }
+
   })
 
 
