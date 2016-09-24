@@ -43,3 +43,24 @@ export function deleteImg(fileName){
     })
   })
 }
+
+export function deleteAllImgs(imgsData){
+  return new Promise((resolve, reject) => {
+    const s3 = new aws.S3();
+
+    const s3Params = {
+      Bucket: S3_BUCKET,
+      Delete: {
+        Objects: imgsData.map((img) => {
+          return {Key: img.imgid};
+        }),
+        Quiet: true
+      }
+    }
+
+    s3.deleteObjects(s3Params, (err, data) => {
+      if(err) reject({status: false});
+      else resolve({status: true});
+    })
+  })
+}

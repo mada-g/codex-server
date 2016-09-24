@@ -4,6 +4,7 @@ import shortid from 'shortid';
 
 import render from '../../utils/template-renderer.js';
 import currentDate from '../../utils/date.js';
+import {deleteAllImgs} from '../s3request.js';
 
 import {isSecure, findPage, retrievePage} from './middlewares.js';
 
@@ -114,10 +115,10 @@ export default function(userDB){
         $set: {"journalCollection.$": pageData}
       })
 
-      let res = yield doc.save();
       this.body = {status: true, error: null};
 
     } catch(err) {
+      console.log(err);
       this.body = {status: false, error: err};
     }
 
@@ -165,6 +166,22 @@ export default function(userDB){
     const pageid = this.request.query['pageid'];
 
     try{
+
+      let imgs = yield userDB.getFields({username: this.req.user.username, "pageImgs.pageid": pageid}, {"pageImgs.$": 1});
+
+      let imgsData = imgs['pageImgs'][0]['imgsData'];
+
+      if(imgsData.length > 0){
+        console.log('deleting all images...');
+        let res = yield deleteAllImgs(imgsData);
+        console.log('+++++++++++++++++++++++++++++++++');
+        console.log(res);
+        console.log('+++++++++++++++++++++++++++++++++');
+      } else {
+        console.log('no images!');
+      }
+
+
       let doc = yield userDB.getModel().update(
         {username: this.req.userid},
         {$pull: {"journalCollection": {"pageid": pageid}, "pageImgs":{"pageid": pageid} }}

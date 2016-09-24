@@ -1,20 +1,21 @@
 export default function(data){
 
-  let h = data.options.height;
-  let w = data.options.width;
+  let s = `width: ${data.options.size}%; height: auto;`;
 
-  let s = '';
+  let label = "";
+  let str = data.content.trim();
 
-  if(w >= h){
-    s = "width: 100%; height: auto;";
+  console.log(str);
+
+  if(str.length > 0){
+    label = `<div class="img-label-container">
+      <div class="img-label" style="${s}">${data.content}</div>
+    </div>`;
   }
-  else {
-    s = `width: ${80*w/h}%; height: auto;`;
-  }
-
-  return `<div class="item">
-    <div class="img">
+  return `<div class="item ${data.options.align}">
+    <div class="imgItem">
       <img src=${data.src} style="${s}" />
+        ${label}
     </div>
   </div>`
 }

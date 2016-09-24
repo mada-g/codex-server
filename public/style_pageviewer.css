@@ -97,10 +97,29 @@ body, div{
   line-height: 1.7;
 }
 
-.img img{
+.imgItem{
+  padding: 15px 0;
+}
+
+.imgItem img{
   display: block;
   margin: auto;
 }
+
+.imgItem .img-label{
+    min-width: 200px;
+    margin: auto;
+    padding: 10px;
+    font-size: 17px;
+    font-family: 'Dosis', 'arial';
+    font-style: italic;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    box-sizing: border-box;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+  }
 
 .title{
   display: inline-block;
