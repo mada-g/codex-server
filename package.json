@@ -42,6 +42,7 @@
     "morgan": "^1.7.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
+    "roman-numerals": "^0.3.2",
     "shortid": "^2.2.6",
     "validator": "^5.7.0"
   }

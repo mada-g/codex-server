@@ -1,0 +1,140 @@
+body, div{
+  padding: 0;
+  margin: 0;
+}
+
+.codex{
+  margin: 0;
+  padding: 0;
+  font-family: "Dosis", "arial";
+}
+
+.codex-container{
+  position: relative;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 66%;
+  margin: auto;
+}
+
+.item{
+  box-sizing: border-box;
+}
+
+.item.alignleft   {text-align: left;}
+.item.aligncenter {text-align: center;}
+.item.alignright  {text-align: right;}
+
+
+.heading{
+  position: relative;
+}
+
+.heading-content{
+  padding: 0 15px;
+  text-align: left;
+  display: inline-block;
+}
+
+.heading.h0 {font-size: 35px; margin: 10px 0;}
+.heading.h1 {font-size: 30px; margin: 5px 0;}
+.heading.h2 {font-size: 25px; margin: 2px 0;}
+
+.heading.h0 .heading-level-alt{font-size: 25px;}
+.heading.h1 .heading-level-alt{font-size: 22px;}
+.heading.h2 .heading-level-alt{font-size: 20px;}
+
+.heading-level-sides{
+  min-width: 20px;
+  font-family: 'Dosis';
+  text-align: right;
+  padding: 5px;
+  box-sizing: border-box;
+  border-right: 2px solid black;
+}
+
+.heading-level-alt{
+  min-width: 20px;
+  display: inline-block;
+  box-sizing: border-box;
+  font-weight: bold;
+  font-family: 'Quicksand', 'arial';
+  color: grey;
+  padding-left: 15px;
+}
+
+.heading-label{
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+}
+
+.heading-level{
+  min-width: 70px;
+  border: 1px solid black;
+  font-weight: 500;
+  position: absolute;
+  top:0;
+  text-align: left;
+
+  box-sizing: border-box;
+}
+
+.heading-label-center{
+  padding: 0;
+  width: 100%;
+}
+
+.textbox{
+  padding-bottom: 20px;
+  font-size: 19px;
+  word-wrap: break-word;
+  box-sizing: border-box;
+  color: black;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  line-height: 1.7;
+}
+
+.img img{
+  display: block;
+  margin: auto;
+}
+
+.title{
+  display: inline-block;
+  font-size: 48px;
+  font-family: 'Josefin Sans', 'serif';
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.subtitle{
+  margin: 3px;
+  color: grey;
+  font-family: 'Raleway', 'arial';
+  font-size: 17px;
+}
+
+.subtitle.left{
+  text-align: left;
+}
+
+.subtitle.right{
+  text-align: right;
+}
+
+.subtitle .content{
+  padding: 7px 5px;
+  display: inline-block;
+}
+
+.subtitle .author{
+  color: black;
+  font-weight: bold;
+}
+
+.subtitle .date{
+  font-size: 15px;
+}

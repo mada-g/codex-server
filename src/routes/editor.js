@@ -3,6 +3,7 @@ import koaBody from 'koa-body';
 import shortid from 'shortid';
 
 import render from '../../utils/template-renderer.js';
+import currentDate from '../../utils/date.js';
 
 import {isSecure, findPage, retrievePage} from './middlewares.js';
 
@@ -105,7 +106,8 @@ export default function(userDB){
         items: JSON.stringify(data.items),
         published: data.published,
         headings: data.headings,
-        headingNumbering: data.headingNumbering
+        headingNumbering: data.headingNumbering,
+        date: currentDate()
       }
 
       let doc = yield userDB.getModel().update({username: this.req.userid, "journalCollection.pageid": data.pageid}, {
@@ -134,10 +136,11 @@ export default function(userDB){
         published: false,
         sections: ['title'],
         items: JSON.stringify({
-          'title': {type:"text", content:"New Page", options: {align: "aligncenter"}}
+          'title': {type:"title", content:"Enter Title", options: {align: "aligncenter"}}
         }),
         headings: [],
-        headingNumbering: "standard"
+        headingNumbering: "standard",
+        date: currentDate()
       }
 
       let newPageInfo = {pageid: pageid, title: "New Page", details: "September 20 1992"}

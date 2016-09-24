@@ -1,8 +1,11 @@
 import Router from 'koa-router';
 
 import render from '../../utils/template-renderer.js';
-
 import {userFromURL, findPage} from './middlewares.js';
+import pageviewer from '../pageviewer/index.js';
+
+import currentDate from '../../utils/date.js';
+
 
 export default function(userDB){
   let router = new Router();
@@ -51,9 +54,25 @@ export default function(userDB){
   })
 
 
-  router.get('/view/:userid/:pageid', userFromURL, findPage(userDB), function *(next){
-    console.log(this.req.userid);
-    this.body = this.req.pageObj;
+  router.get('/view/:userid/:pageid', function *(next){
+
+    let doc = yield userDB.getFields({username: this.params.userid, "journalCollection.pageid": this.params.pageid}, {"journalCollection.$": 1});
+
+    let pageData = doc['journalCollection'][0];
+
+    let _pageData = {};
+
+    for(let k in pageData){
+      _pageData[k] = k==="items" ? JSON.parse(pageData[k]) : pageData[k];
+    }
+
+
+    console.log(currentDate());
+
+    console.log(_pageData);
+
+    this.body = pageviewer(_pageData, {auth: this.params.userid});
+
   })
 
   return router;

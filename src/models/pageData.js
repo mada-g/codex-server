@@ -7,5 +7,6 @@ export default mongoose.Schema({
   items: String,
   published: Boolean,
   headings: [String],
-  headingNumbering: String
+  headingNumbering: String,
+  date: String
 })
