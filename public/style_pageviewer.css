@@ -13,8 +13,15 @@ body, div{
   position: relative;
   padding: 10px;
   box-sizing: border-box;
-  width: 66%;
+  width: 70%;
   margin: auto;
+}
+
+@media screen and (max-width:500px) {
+  .codex-container{
+    width: 100%;
+    padding: 5px;
+  }
 }
 
 .item{
@@ -31,9 +38,10 @@ body, div{
 }
 
 .heading-content{
-  padding: 0 15px;
   text-align: left;
   display: inline-block;
+  font-weight: 600;
+  max-width: 100%;
 }
 
 .heading.h0 {font-size: 35px; margin: 10px 0;}
@@ -60,7 +68,6 @@ body, div{
   font-weight: bold;
   font-family: 'Quicksand', 'arial';
   color: grey;
-  padding-left: 15px;
 }
 
 .heading-label{
@@ -156,4 +163,34 @@ body, div{
 
 .subtitle .date{
   font-size: 15px;
+}
+
+.mediaItem{
+  position: relative;
+  margin: auto;
+  margin-bottom: 25px;
+  box-sizing: border-box;
+
+  width: 70vw;
+  height: 39vw;
+
+  min-width: 320px;
+  min-height: 180px;
+
+  max-width: 640px;
+  max-height: 360px;
+}
+
+.media-elem{
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+@media screen and (max-width:500px) {
+  .mediaItem{
+    width: 90vw;
+    height: 50vw;
+  }
 }
