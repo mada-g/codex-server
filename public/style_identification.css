@@ -126,3 +126,12 @@ a{
 
   margin-right: 10px;
 }
+
+.error-msg{
+  margin: 0;
+  padding: 70px 10px;
+  text-align: center;
+
+  font-family: "Josefin Sans", "Dosis", "arial";
+  font-size: 36px;
+}

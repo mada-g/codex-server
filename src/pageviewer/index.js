@@ -20,24 +20,25 @@ export default function(appState, details){
     <div class="codex-container">
   `;
 
+  console.log(appState.items);
 
   appState.sections.forEach( (section) => {
     let item = appState.items[section];
 
     if(item.type === "text"){
-      htmlStr += textbox(item);
+      htmlStr += textbox(item) || "";
     }
     else if(item.type === "title"){
-      htmlStr += title(item, details.auth, appState.date);
+      htmlStr += title(item, details.auth, appState.date) || "";
     }
     else if(item.type === "header"){
       htmlStr += heading(item, appState.headingNumbering);
     }
     else if(item.type === "img"){
-      htmlStr += image(item);
+      htmlStr += image(item) || "";
     }
     else if(item.type === "youtube" || item.type === "codepen"){
-      htmlStr += mediaItem(item);
+      htmlStr += mediaItem(item) || "";
     }
   })
 

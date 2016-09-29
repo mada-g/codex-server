@@ -1,4 +1,5 @@
 import validator from 'validator';
+import pageviewer from '../pageviewer/index.js';
 
 export let userFromURL = function *(next){
   this.req.userid = this.params.userid;
@@ -46,6 +47,30 @@ export function findPage(userDB){
   }
 }
 
+export function renderPage(userDB){
+  return function *(next){
+    try{
+      let userid = this.req.userid || this.params.userid;
+      if(!userid) throw 'no user';
+
+      let doc = yield userDB.getFields({username: userid, "journalCollection.pageid": this.params.pageid}, {"journalCollection.$": 1});
+      let pageData = doc['journalCollection'][0];
+      let _pageData = {};
+
+      for(let k in pageData){
+        _pageData[k] = k==="items" ? JSON.parse(pageData[k]) : pageData[k];
+      }
+
+      this.req.pageHtml = pageviewer(_pageData, {auth: userid});
+    } catch(err){
+      console.log('page render error!');
+      console.log(err);
+      this.req.pageHtml = null;
+    }
+
+    yield next;
+  }
+}
 
 export let isSecure = function *(next){
   if(!this.isAuthenticated()){

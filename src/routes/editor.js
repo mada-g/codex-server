@@ -6,7 +6,7 @@ import render from '../../utils/template-renderer.js';
 import currentDate from '../../utils/date.js';
 import {deleteAllImgs} from '../s3request.js';
 
-import {isSecure, findPage, retrievePage} from './middlewares.js';
+import {isSecure, renderPage, findPage, retrievePage} from './middlewares.js';
 
 export default function(userDB){
   let router = new Router();
@@ -17,6 +17,7 @@ export default function(userDB){
       let doc = yield userDB.getFields({username: this.req.user.username}, {
         "journalCollection.title": 1,
         "journalCollection.pageid": 1,
+        "journalCollection.date": 1,
         "journalCollection.published": 1
       });
 
@@ -27,8 +28,8 @@ export default function(userDB){
       let drafts = [], published = [];
 
       doc['journalCollection'].forEach((p) => {
-        if(p.published) published.push({pageid: p.pageid, title: p.title, details: "ok ok ok"});
-        else drafts.push({pageid: p.pageid, title: p.title, details: "ok ok ok"});
+        if(p.published) published.push({pageid: p.pageid, title: p.title, details: p.date});
+        else drafts.push({pageid: p.pageid, title: p.title, details: p.date});
       })
 
 
@@ -70,10 +71,18 @@ export default function(userDB){
 
     } catch (err) {
       console.log(err);
-      this.body = err;
+      this.body = yield render('error', {msg: "page not found!"});
     }
 
   });
+
+  router.get('/preview/:pageid', isSecure, renderPage(userDB), function *(next){
+    if(this.req.pageHtml === null){
+      this.body = "error! Page not found";
+    } else {
+      this.body = this.req.pageHtml;
+    }
+  })
 
 
   router.get('/pageimgs', isSecure, function *(next){
